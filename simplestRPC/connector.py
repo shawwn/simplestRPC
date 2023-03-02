@@ -127,9 +127,16 @@ class Client:
 			if(count == 2):
 				raise Exception("coneciton closed")
 
-
+			def recvfrom_all(socket, bufsize=1024):
+				data = b''
+				while True:
+					data_chunk, address = socket.recvfrom(bufsize or 1024)
+					if data_chunk:
+						data += data_chunk
+					else:
+						return data, address
 			try:
-				ret = self.__socket.recvfrom(buffsize if buffsize is not None else 1024)
+				ret = recvfrom_all(self.__socket, buffsize)
 			except Exception:
 				count += 1
 			else:
