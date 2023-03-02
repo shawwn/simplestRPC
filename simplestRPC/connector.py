@@ -112,14 +112,15 @@ class Client:
 	def send(self, msg):
 		sent = None
 
-		try:
-			sent = self.__socket.sendall(marshaller.marshal(msg))
-		except Exception as err:
-			raise err
+		data = marshaller.marshal(msg)
+		sent = self.__socket.sendall(len(data).to_bytes(8, 'little'))
+		assert not sent
+		sent = self.__socket.sendall(data)
+		assert not sent
 
 		return sent
 
-	def recv(self, buffsize=None):
+	def recv(self):
 		msg = ''
 		count = 0
 
@@ -127,16 +128,10 @@ class Client:
 			if(count == 2):
 				raise Exception("coneciton closed")
 
-			def recvfrom_all(socket, bufsize=1024):
-				data = b''
-				while True:
-					data_chunk, address = socket.recvfrom(bufsize or 1024)
-					if data_chunk:
-						data += data_chunk
-					else:
-						return data, address
 			try:
-				ret = recvfrom_all(self.__socket, buffsize)
+				buf = self.__socket.recv(8)
+				nbytes = int.from_bytes(buf, 'little')
+				ret = self.__socket.recvfrom(nbytes)
 			except Exception:
 				count += 1
 			else:
