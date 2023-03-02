@@ -18,6 +18,7 @@ class Listener:
 
 		# set socket
 		self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.__socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 	def __del__(self):
 		if(self.__socket is not None):
